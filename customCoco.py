@@ -58,12 +58,12 @@ DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 ############################################################
 
 
-class PGConfig(Config):
+class CustomCocoConfig(Config):
     """Configuration for training on the toy  dataset.
     Derives from the base Config class and overrides some values.
     """
     # Give the configuration a recognizable name
-    NAME = "pg"
+    NAME = "cutlery"
 
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
@@ -85,7 +85,7 @@ class PGConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "PG"
+    NAME = "cutlery"
 
     # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
     GPU_COUNT = 1
@@ -292,7 +292,7 @@ if __name__ == '__main__':
     print("Weights: ", args.weights)
     print("Logs: ", args.logs)
 
-    class InferenceConfig(PGConfig):
+    class InferenceConfig(CustomCocoConfig):
     	GPU_COUNT = 1
     	IMAGES_PER_GPU = 1
     	IMAGE_MIN_DIM = 512
