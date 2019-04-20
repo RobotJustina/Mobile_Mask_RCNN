@@ -70,7 +70,7 @@ class CustomCocoConfig(Config):
     IMAGES_PER_GPU = 2
 
     # Number of classes (including background)
-    NUM_CLASSES = 1 + 1  # Background + balloon
+    NUM_CLASSES = 1 + 6  # Background + balloon
 
     # Number of training steps per epoch
     STEPS_PER_EPOCH = 100
@@ -78,21 +78,21 @@ class CustomCocoConfig(Config):
     # Skip detections with < 90% confidence
     DETECTION_MIN_CONFIDENCE = 0.9
 
-    BACKBONE = "mobilenetv1"
+    BACKBONE = "resnet50"
 
     """Configuration for training on the cigarette butts dataset.
     Derives from the base Config class and overrides values specific
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "cutlery"
+    NAME = "tableware"
 
     # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
     
     # Number of classes (including background)
-    NUM_CLASSES = 1 + 4  # background + 1 (cig_butt)
+    NUM_CLASSES = 1 + 6  # background + 1 (cig_butt)
 
     # All of our training images are 512x512
     IMAGE_MIN_DIM = 512
@@ -106,7 +106,8 @@ class CustomCocoConfig(Config):
     VALIDATION_STEPS = 5
                                                                                 
     # Matterport originally used resnet101, but I downsized to fit it on my graphics card
-    BACKBONE = 'mobilenetv1'
+    #BACKBONE = 'mobilenetv1'
+    BACKBONE = 'resnet50'
 
     # To be honest, I haven't taken the time to figure out what these do
     RPN_ANCHOR_SCALES = (8, 16, 32, 64, 128)
@@ -245,9 +246,9 @@ def detect_and_color_splash(model, video_path=None):
 
     # Define codec and create video writer
     file_name = "splash_{:%Y%m%dT%H%M%S}.avi".format(datetime.datetime.now())
-    vwriter = cv2.VideoWriter(file_name,
-                                  cv2.VideoWriter_fourcc(*'MJPG'),
-                                  fps, (width, height))
+    #vwriter = cv2.VideoWriter(file_name,
+    #                              cv2.VideoWriter_fourcc(*'MJPG'),
+    #                              fps, (width, height))
 
     count = 0
     success = True
@@ -265,9 +266,10 @@ def detect_and_color_splash(model, video_path=None):
                 # RGB -> BGR to save image to video
                 splash = splash[..., ::-1]
                 # Add image to video writer
-                vwriter.write(splash)
+                cv2.imshow('Mask RCNN', splash)
+                cv2.waitKey(1)
                 count += 1
-    vwriter.release()
+    #vwriter.release()
     print("Saved to ", file_name)
 
 
@@ -297,7 +299,7 @@ if __name__ == '__main__':
     	IMAGES_PER_GPU = 1
     	IMAGE_MIN_DIM = 512
    	IMAGE_MAX_DIM = 512
-    	DETECTION_MIN_CONFIDENCE = 0.85
+    	DETECTION_MIN_CONFIDENCE = 0.45
     config = InferenceConfig()
     config.display()
 
