@@ -63,59 +63,38 @@ class CustomCocoConfig(Config):
     Derives from the base Config class and overrides some values.
     """
     # Give the configuration a recognizable name
-    NAME = "cutlery"
+    NAME = "tableware"
 
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
-    IMAGES_PER_GPU = 2
+    IMAGES_PER_GPU = 1
 
     # Number of classes (including background)
-    NUM_CLASSES = 1 + 6  # Background + balloon
+    NUM_CLASSES = 1 + 4  # Background + balloon
 
     # Number of training steps per epoch
     STEPS_PER_EPOCH = 100
 
     # Skip detections with < 90% confidence
-    DETECTION_MIN_CONFIDENCE = 0.9
+    DETECTION_MIN_CONFIDENCE = 0.1
 
     BACKBONE = "resnet50"
-
-    """Configuration for training on the cigarette butts dataset.
-    Derives from the base Config class and overrides values specific
-    to the cigarette butts dataset.
-    """
-    # Give the configuration a recognizable name
-    NAME = "tableware"
-
-    # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
-    GPU_COUNT = 1
-    IMAGES_PER_GPU = 1
-    
-    # Number of classes (including background)
-    NUM_CLASSES = 1 + 6  # background + 1 (cig_butt)
 
     # All of our training images are 512x512
     IMAGE_MIN_DIM = 512
     IMAGE_MAX_DIM = 512
 
-    # You can experiment with this number to see if it improves training
-    STEPS_PER_EPOCH = 500
-
-    # This is how often validation is run. If you are using too much hard drive space
-    # on saved models (in the MODEL_DIR), try making this value larger.
-    VALIDATION_STEPS = 5
-                                                                                
     # Matterport originally used resnet101, but I downsized to fit it on my graphics card
     #BACKBONE = 'mobilenetv1'
     BACKBONE = 'resnet50'
 
     # To be honest, I haven't taken the time to figure out what these do
-    RPN_ANCHOR_SCALES = (8, 16, 32, 64, 128)
-    TRAIN_ROIS_PER_IMAGE = 32
-    MAX_GT_INSTANCES = 50 
-    POST_NMS_ROIS_INFERENCE = 500 
-    POST_NMS_ROIS_TRAINING = 1000
-    USE_MULTIPROCESSING = False
+    #RPN_ANCHOR_SCALES = (8, 16, 32, 64, 128)
+    #TRAIN_ROIS_PER_IMAGE = 32
+    #MAX_GT_INSTANCES = 50 
+    #POST_NMS_ROIS_INFERENCE = 500 
+    #POST_NMS_ROIS_TRAINING = 1000
+    USE_MULTIPROCESSING = True
 
 
 ############################################################
@@ -297,9 +276,7 @@ if __name__ == '__main__':
     class InferenceConfig(CustomCocoConfig):
     	GPU_COUNT = 1
     	IMAGES_PER_GPU = 1
-    	IMAGE_MIN_DIM = 512
-   	IMAGE_MAX_DIM = 512
-    	DETECTION_MIN_CONFIDENCE = 0.45
+    	DETECTION_MIN_CONFIDENCE = 0.9
     config = InferenceConfig()
     config.display()
 
