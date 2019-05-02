@@ -24,6 +24,8 @@ from matplotlib import patches,  lines
 from matplotlib.patches import Polygon
 import IPython.display
 
+import cv2
+
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../")
 
@@ -59,6 +61,12 @@ def display_images(images, titles=None, cols=4, cmap=None, norm=None,
         i += 1
     plt.show()
 
+random.seed(0)
+N=90
+brightness = 1.0
+hsv = [(i / N, 1, brightness) for i in range(N)]
+random.shuffle(hsv)
+
 
 def random_colors(N, bright=True):
     """
@@ -71,6 +79,13 @@ def random_colors(N, bright=True):
     colors = list(map(lambda c: colorsys.hsv_to_rgb(*c), hsv))
     random.shuffle(colors)
     return colors
+
+def class_color(id,prob):
+    _hsv = list(hsv[id])
+    # _hsv[2]=random.uniform(0.8, 1)
+    _hsv[2]=prob
+    color = colorsys.hsv_to_rgb(*_hsv)
+    return color
 
 
 def apply_mask(image, mask, color, alpha=0.5):
@@ -174,6 +189,81 @@ def display_instances(image, boxes, masks, class_ids, class_names,
     if auto_show:
         plt.show()
 
+def draw_instances(image, boxes, masks, class_ids, class_names,
+                      scores=None, title="",
+                      figsize=(16, 16), ax=None):
+    """
+    boxes: [num_instance, (y1, x1, y2, x2, class_id)] in image coordinates.
+    masks: [num_instances, height, width]
+    class_ids: [num_instances]
+    class_names: list of class names of the dataset
+    scores: (optional) confidence scores for each box
+    figsize: (optional) the size of the image.
+    """
+    # Number of instances
+    N = boxes.shape[0]
+    if not N:
+        print("\n*** No instances to display *** \n")
+    else:
+        assert boxes.shape[0] == masks.shape[-1] == class_ids.shape[0]
+
+    # if not ax:
+    #     _, ax = plt.subplots(1, figsize=figsize)
+
+    # Generate random colors
+    colors = random_colors(N)
+
+    # Show area outside image boundaries.
+    height, width = image.shape[:2]
+
+    masked_image = image.copy()
+    for i in range(N):
+        class_id = class_ids[i]
+        score = scores[i] if scores is not None else None
+        # color = colors[i]
+        color = class_color(class_id,score*score*score*score)
+        # Bounding box
+        if not np.any(boxes[i]):
+            # Skip this instance. Has no bbox. Likely lost in image cropping.
+            continue
+        y1, x1, y2, x2 = boxes[i]
+        # p = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2,
+        #                       alpha=0.7, linestyle="dashed",
+        #                       edgecolor=color, facecolor='none')
+
+        cv2.rectangle(masked_image, (x1, y1),(x2, y2), [int(x*255) for x in (color)],4)
+
+        # Label
+        label = class_names[class_id]
+        x = random.randint(x1, (x1 + x2) // 2)
+        caption = "%s %d%%"%(label, int(score*100)) if score else label
+        # ax.text(x1, y1 + 8, caption,
+        #         color='w', size=11, backgroundcolor="none")
+
+        yyy=y1 -16
+        if yyy <0:
+            yyy=0
+
+        cv2.putText(masked_image, caption, (x1, yyy), cv2.FONT_HERSHEY_SIMPLEX, 0.75, [int(x*255) for x in (color)],2)
+        # Mask
+        mask = masks[:, :, i]
+        masked_image = apply_mask(masked_image, mask, color)
+
+        # Mask Polygon
+        # Pad to ensure proper polygons for masks that touch image edges.
+        padded_mask = np.zeros(
+            (mask.shape[0] + 2, mask.shape[1] + 2), dtype=np.uint8)
+        padded_mask[1:-1, 1:-1] = mask
+        contours = find_contours(padded_mask, 0.5)
+        for verts in contours:
+            # Subtract the padding and flip (y, x) to (x, y)
+            verts = np.fliplr(verts) - 1
+            p = Polygon(verts, facecolor="none", edgecolor=color)
+            # ax.add_patch(p)
+            pts = np.array(verts.tolist(), np.int32)
+            pts = pts.reshape((-1,1,2))
+            cv2.polylines(masked_image,[pts],True,[int(x*255) for x in (color)],2)
+    return masked_image.astype(np.uint8)
 
 def display_differences(image,
                         gt_box, gt_class_id, gt_mask,
