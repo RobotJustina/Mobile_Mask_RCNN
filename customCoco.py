@@ -70,7 +70,7 @@ class CustomCocoConfig(Config):
     IMAGES_PER_GPU = 1
 
     # Number of classes (including background)
-    NUM_CLASSES = 1 + 4  # Background + balloon
+    NUM_CLASSES = 1 + 36  # Background + balloon
 
     # Number of training steps per epoch
     STEPS_PER_EPOCH = 100
@@ -81,8 +81,8 @@ class CustomCocoConfig(Config):
     BACKBONE = "resnet50"
 
     # All of our training images are 512x512
-    IMAGE_MIN_DIM = 512
-    IMAGE_MAX_DIM = 512
+    #IMAGE_MIN_DIM = 512
+    #IMAGE_MAX_DIM = 512
 
     # Matterport originally used resnet101, but I downsized to fit it on my graphics card
     #BACKBONE = 'mobilenetv1'
@@ -276,7 +276,7 @@ if __name__ == '__main__':
     class InferenceConfig(CustomCocoConfig):
     	GPU_COUNT = 1
     	IMAGES_PER_GPU = 1
-    	DETECTION_MIN_CONFIDENCE = 0.9
+    	DETECTION_MIN_CONFIDENCE = 0.65
     config = InferenceConfig()
     config.display()
 
